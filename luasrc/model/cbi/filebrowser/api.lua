@@ -16,7 +16,7 @@ local wget_args = {
 }
 local command_timeout = 300
 
-local LEDE_BOARD = nil
+local OPENWRT_BOARD = nil
 local DISTRIB_TARGET = nil
 
 function uci_get_type(type, config, default)
@@ -105,8 +105,8 @@ end
 local function auto_get_arch()
     local arch = nixio.uname().machine or ""
     if fs.access("/usr/lib/os-release") then
-        LEDE_BOARD = sys.exec(
-                         "echo -n `grep 'LEDE_BOARD' /usr/lib/os-release | awk -F '[\\042\\047]' '{print $2}'`")
+        OPENWRT_BOARD = sys.exec(
+                         "echo -n `grep 'OPENWRT_BOARD' /usr/lib/os-release | awk -F '[\\042\\047]' '{print $2}'`")
     end
     if fs.access("/etc/openwrt_release") then
         DISTRIB_TARGET = sys.exec(
@@ -114,11 +114,11 @@ local function auto_get_arch()
     end
 
     if arch == "mips" then
-        if LEDE_BOARD and LEDE_BOARD ~= "" then
-            if string.match(LEDE_BOARD, "ramips") == "ramips" then
+        if OPENWRT_BOARD and OPENWRT_BOARD ~= "" then
+            if string.match(OPENWRT_BOARD, "ramips") == "ramips" then
                 arch = "ramips"
             else
-                arch = sys.exec("echo '" .. LEDE_BOARD ..
+                arch = sys.exec("echo '" .. OPENWRT_BOARD ..
                                     "' | grep -oE 'ramips|ar71xx'")
             end
         elseif DISTRIB_TARGET and DISTRIB_TARGET ~= "" then
@@ -151,7 +151,7 @@ local function get_file_info(arch)
     elseif arch:match("^armv[5-8]") then
         file_tree = "armv"
         sub_version = arch:match("[5-8]")
-        if LEDE_BOARD and string.match(LEDE_BOARD, "bcm53xx") == "bcm53xx" then
+        if OPENWRT_BOARD and string.match(OPENWRT_BOARD, "bcm53xx") == "bcm53xx" then
             sub_version = "5"
         elseif DISTRIB_TARGET and string.match(DISTRIB_TARGET, "bcm53xx") ==
             "bcm53xx" then
